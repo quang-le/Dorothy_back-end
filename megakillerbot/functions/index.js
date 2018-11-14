@@ -96,11 +96,19 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     return stringRequest;
   }
 
-  function sendGETReq(url,string){
-    https.get((url+string), (res) =>{
-      console.log(res);
-      return res;
-      });
+  //get your code for AJAX!!!
+  async function sendGETReq(url,string){
+    fetch((url+string),{
+      method:'get',
+    });
+    const links= await response.json()
+    console.log(links);
+    return links;
+
+    // https.get((url+string), (res) =>{
+    //   console.log(res);
+    //   return res;
+    //   });
   }
 
   
