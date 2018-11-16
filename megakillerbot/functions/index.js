@@ -27,7 +27,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     let currentContext=(agent.context.get('useraskedtech'));
     console.log(currentContext, sessionsVar);
     agent.add("Wait, I'm looking in db for appropriate resource");
-    let answerRaw=sendGETReq('https://localhost:3003',prepareStringForGETReq(createTagsArray(currentContext.parameters)));
+    let answerRaw=sendGETReq('https://91.183.144.174:3003',prepareStringForGETReq(createTagsArray(currentContext.parameters)));
     console.log('answerRaw:',answerRaw);
     //let answer=JSON.parse(answerRaw);
     //console.log(answer);
@@ -96,19 +96,13 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     return stringRequest;
   }
 
-  //get your code for AJAX!!!
-  async function sendGETReq(url,string){
-    fetch((url+string),{
-      method:'get',
-    });
-    const links= await response.json()
-    console.log(links);
-    return links;
-
-    // https.get((url+string), (res) =>{
-    //   console.log(res);
-    //   return res;
-    //   });
+  function sendGETReq(url,string){
+    let getReq=url.concat(string);
+    console.log(getReq);
+    https.get(getReq, (res) =>{
+      console.log("api answer:",res);
+      return res;
+      });
   }
 
   
@@ -145,6 +139,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
   intentMap.set('Default Welcome Intent', welcome);
   intentMap.set('Default Fallback Intent', fallback);
   intentMap.set('UserAsksTech',UserAsksTech);
+  //intentMap.set('UserAsksDorotinder', UserAsksDorotinder);
   // intentMap.set('<INTENT_NAME_HERE>', yourFunctionHandler);
   // intentMap.set('<INTENT_NAME_HERE>', googleAssistantHandler);
   agent.handleRequest(intentMap);
