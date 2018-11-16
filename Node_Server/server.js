@@ -4,7 +4,7 @@ const app=express();
 const dotenv=require('dotenv').config();
 
 //please secure this
-let url = "mongodb://process.env.DB_USER:process.env.DB_PWD@ds063889.mlab.com:63889/dorothytest";
+let url = "mongodb://sonnyboy:lovelace2@ds063889.mlab.com:63889/dorothytest";
 const port = process.env.PORT || 3003;
 
 var myDB;//global var for the DB, not so clean
