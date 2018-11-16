@@ -1,6 +1,7 @@
 const express= require('express');
 const bodyParser= require('body-parser')
 const app=express();
+const dotenv=require('dotenv').config();
 
 //please secure this
 let url = "mongodb://process.env.DB_USER:process.env.DB_PWD@ds063889.mlab.com:63889/dorothytest";
