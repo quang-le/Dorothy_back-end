@@ -49,4 +49,5 @@ app.get('/tech-answers/', (req,res,next)=>{
 
 app.get('/', (req,res)=>{
     console.log("welcome");
+    res.send("hello world");
 })
