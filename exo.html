@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>exo</title>
+</head>
+<body>
+    <form action="">
+        <input type="text" id="exo">
+        <button type="button" id="btn">Youpi!</button>
+    </form>
+</body>
+<script>
+    let userInput=document.getElementById("exo").value
+    
+    function checkIfWord(word){
+        let letters=word.split("");
+        let testRegex=/[a-z]/i
+        for (let i=0;i<letters.length;i++){
+            if(testRegex.test(letters[i])===false){
+                alert("not a word!")
+                return false
+            }
+        }
+        return true;
+    }
+
+    function checkPalindrome(arrayOfLetters){
+        let controller=(arrayOfLetters.length)-1;
+        for (let i=0;i<arrayOfLetters.length;i++){
+            if (arrayOfLetters[i]!=arrayOfLetters[controller-i]){
+                return alert ("not a palindrome");
+            }
+        }
+        return arrayOfLetters.join();
+    }
+
+    function checkPalindromeRecursive(lettersArray,index){
+        let controller=(lettersArray.length)-1;
+        if (index>(controller-index)){
+            console.log(lettersArray.join());
+            console.log("finished");
+        }
+        else if (lettersArray[index]===lettersArray[controller-index]){
+            checkPalindromeRecursive(lettersArray,(index+1));
+        }
+        else{
+            return alert("not a recursive palindrome!");
+        }
+    }
+
+    function runner(word){
+        console.log('start')
+        let wordSplit=word.split("");
+        let wordChecked=checkIfWord(word);
+        if (wordChecked){
+            //checkPalindrome(wordSplit);
+            checkPalindromeRecursive(wordSplit,0);
+        } 
+        console.log('finished')  
+    }
+    let button=document.getElementById("btn");
+    document.getElementById("btn").addEventListener("click",runner(userInput));
+</script>
+</html>

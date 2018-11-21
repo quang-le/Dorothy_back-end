@@ -26,28 +26,60 @@ app.get('/tech-answers/', (req,res,next)=>{
     console.log(req.query)
     
     let paramArray=Object.values(req.query);
-    let tags=paramArray.map((param)=>{
+    let userTags=paramArray.map((param)=>{
         return param;
     })
-    console.log(tags);
-    myDB.collection('resources').find({tags:{$all:tags}}).toArray(function(err,result){
-        if (err) throw err;
-        let resultFiltered= result.map((object)=>{
-            return {'url':object.url,'description':object.description};
+    console.log(userTags);
+    
+    //hard match with all tags provided by user. 
+    // myDB.collection('resources').find({tags:{$all:tags}}).toArray(function(err,result){
+    //     if (err) throw err;
+    //     let resultFiltered= result.map((object)=>{
+    //         return {'url':object.url,'description':object.description};
+    //     })
+    //     let preparedData={...resultFiltered}
+    //     let dataToSend=JSON.stringify(preparedData);
+    //     console.log(dataToSend);
+    //     return res.send(dataToSend);
+    // });
+    //Hard match end
+    //Match scoring found on SO
+    var sortedResults=myDB.collection('resources').aggregate([
+        {$unwind:'$tags'},
+        {$match:{tags:{$in:userTags}}},
+        {$group:{_id:'$_id',count:{$sum:1}}},
+        {$project:{_id:1,url:1,description:1,count:1,score:{$divide:['$count',userTags.length]}}},
+        {$sort:{score:-1}}
+    ]);
+    console.log("sortedResults",sortedResults);
+    let resultID=sortedResults
+        .toArray(function (err, result){
+            if (err) throw err;
+            let resultFiltered= result.map((object)=>{
+                return {'url':object.url,'description':object.description,'match':object.score, 'id':object._id};
+            })
+            let data={...resultFiltered}
+            console.log("data ID: ",data);
+            return data;
         })
-        let preparedData={...resultFiltered}
-        // let prepareData={};
-        // for(let i=0;i<resultFiltered.length;i++){
-        //     prepareData[i]=resultFiltered[i];
-        // }
-        let dataToSend=JSON.stringify(preparedData);
-        console.log(dataToSend);
-        return res.send(dataToSend);
-    });
-    //res.send(req.params);
+        .then(data=>data.map(linkID=>{
+            if (linkID>0){
+                return linkID
+            }
+        }))
+        //add db.find here
+ 
 })
 
 app.get('/', (req,res)=>{
     console.log("welcome");
     res.send("hello world");
 })
+
+// let sortedResults=db.collection('resources').aggregate([
+//     {$unwind:'$tags'},
+//     {$match:{tags:{$in:tags}}},
+//     {$group:{_id:'$_id',count:{$sum:1}}},
+//     {$project:{_id:1,count:1,score:{$divide:['$count',tags.length]}}},
+//     {$sort:$score=-1}
+// ]);
