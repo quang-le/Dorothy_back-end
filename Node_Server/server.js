@@ -22,14 +22,11 @@ mongodb.connect(url, function(err,db,){
 })
 
 app.get('/tech-answers/', (req,res,next)=>{
-    console.log('request received')
-    console.log(req.query)
     
     let paramArray=Object.values(req.query);
     let userTags=paramArray.map((param)=>{
         return param;
     })
-    console.log(userTags);
 
     var sortedResults=myDB.collection('resources').aggregate([
         {$unwind:'$tags'},
@@ -39,7 +36,6 @@ app.get('/tech-answers/', (req,res,next)=>{
         {$sort:{score:-1}}
     ]);
 
-    //console.log("sortedResults",sortedResults);
     let resultID=new Promise (function (resolve,reject){
         sortedResults
         .toArray(function (err, result){
@@ -49,27 +45,26 @@ app.get('/tech-answers/', (req,res,next)=>{
             let resultFiltered= result.map((object)=>{
                 return {'match':object.score, '_id':object._id};
             })
-            //let data={...resultFiltered};
             console.log("data ID: ",resultFiltered);
             return resolve(resultFiltered);
         })})
         .then(data=>{   
             let dataForFrontEnd=[];
             console.log("data",data);
-                Promise.all(data.map(linkID=>{
-                    console.log("linkID",linkID);
-
-                    myDB.collection('resources')
-                        .find({"_id":linkID._id})
-                        .toArray(function(err,result){
-                            if (err) throw err;
-                            console.log(result);
-                            dataForFrontEnd.push(result);
-                            console.log("mapped Element",dataForFrontEnd);
-                            return res.send(dataForFrontEnd)
-                        })
-                }))
-                .then(console.log("promise all",dataForFrontEnd))
+            let linkIDs=data.map((link)=>{
+                return link._id
+            })
+            console.log("link_id:",linkIDs);
+                myDB.collection('resources')
+                    .find({_id:{$in:linkIDs}})
+                    .toArray(function(err,result){
+                        if (err) throw err;
+                        console.log(result);
+                        dataForFrontEnd.push(result);
+                        console.log("mapped Element",dataForFrontEnd);
+                        dataToFrontEnd=JSON.stringify(dataForFrontEnd);
+                        return res.send(dataForFrontEnd)
+                    })
             })
         
         .catch(err=>console.log(err))
@@ -79,19 +74,4 @@ app.get('/', (req,res)=>{
     console.log("welcome");
     res.send("hello world");
 })
-
-
-
-    //hard match with all tags provided by user. 
-    // myDB.collection('resources').find({tags:{$all:tags}}).toArray(function(err,result){
-    //     if (err) throw err;
-    //     let resultFiltered= result.map((object)=>{
-    //         return {'url':object.url,'description':object.description};
-    //     })
-    //     let preparedData={...resultFiltered}
-    //     let dataToSend=JSON.stringify(preparedData);
-    //     console.log(dataToSend);
-    //     return res.send(dataToSend);
-    // });
-    //Hard match end
 
