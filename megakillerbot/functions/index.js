@@ -22,51 +22,25 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
   }
 
   function UserAsksTech(agent){
-    debugger;
     let sessionsVar=agent.context.get('sessions-var');
     let currentContext=(agent.context.get('useraskedtech'));
-    console.log(currentContext, sessionsVar);
-    agent.add("Wait, I'm looking in db for appropriate resource");
     let answerRaw=sendGETReq('https://dorothycares.ovh/resources',prepareStringForGETReq(createTagsArray(currentContext.parameters)));
-    console.log('answerRaw:',answerRaw);
-    //let answer=JSON.parse(answerRaw);
-    //console.log(answer);
-    //agent.add(answer);
-    agent.add("check the console");
-
-    //This code in case output contexts get lost by using webhook
-    // agent.context.set({
-    //  "name":currentContext.name,
-    //  "lifespan": currentContext.lifespan,
-    //  "parameters":currentContext.parameters
-    // })
-    // agent.context.set({
-    //   "name":sessionsVar.name,
-    //   "lifespan": sessionsVar.lifespan,
-    //   "parameters":sessionsVar.parameters
-    // })  
   }
 
   function extractTags(contextParameter){
     let paramsArray=[];
     if (typeof contextParameter==='object'){
-      console.log('extract array:',contextParameter)
       paramsArray=contextParameter.map((param)=>{
         return param
       })
     }
     else if(typeof contextParameter==='string'){
-      console.log('extract string:',contextParameter)
       paramsArray.push(contextParameter)
     }
-    console.log('paramsArray:',paramsArray);
     return paramsArray
   }
 
   function createTagsArray(context){
-    console.log("context", context, "context.OS",context.OS, "tech:",context.Technologies,"topic:",context.CodeTopic);
-    console.log('extracted tech:', extractTags(context.Technologies));
-    console.log('extracted OS:',extractTags(context.OS));
     let tagsArray=[];
     if (context.Technologies){
       tagsArray.push(extractTags(context.Technologies))
@@ -77,22 +51,15 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     if (context.OS){
     tagsArray.push(extractTags(context.OS))
     };
-
-    //Refactoring to test out
-    // tagsArray=keys.map((k)=>{
-    //   return extractTags(context.k);
-    // })
     return tagsArray;
   }
 
   function prepareStringForGETReq(tagsArray){
     let stringRequest= "/tech-answers?";
-    console.log(tagsArray);
     stringRequest=stringRequest.concat("0="+tagsArray[0]);
     for (let i=1;i<tagsArray.length;i++){
       stringRequest=stringRequest.concat("&"+i+"="+tagsArray[i]);
     }
-    console.log(stringRequest);
     return stringRequest;
   }
 
