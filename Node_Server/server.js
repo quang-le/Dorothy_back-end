@@ -30,7 +30,58 @@ app.get('/tech-answers/', (req,res,next)=>{
         return param;
     })
     console.log(userTags);
-    
+
+    var sortedResults=myDB.collection('resources').aggregate([
+        {$unwind:'$tags'},
+        {$match:{tags:{$in:userTags}}},
+        {$group:{_id:'$_id',count:{$sum:1}}},
+        {$project:{_id:1,count:1,score:{$divide:['$count',userTags.length]}}},
+        {$sort:{score:-1}}
+    ]);
+
+    //console.log("sortedResults",sortedResults);
+    let resultID=new Promise (function (resolve,reject){
+        sortedResults
+        .toArray(function (err, result){
+            if (err) {
+                return reject (err);
+            }
+            let resultFiltered= result.map((object)=>{
+                return {'match':object.score, '_id':object._id};
+            })
+            //let data={...resultFiltered};
+            console.log("data ID: ",resultFiltered);
+            return resolve(resultFiltered);
+        })})
+        .then(data=>{   
+            let dataForFrontEnd=[];
+            console.log("data",data);
+                Promise.all(data.map(linkID=>{
+                    console.log("linkID",linkID);
+
+                    myDB.collection('resources')
+                        .find({"_id":linkID._id})
+                        .toArray(function(err,result){
+                            if (err) throw err;
+                            console.log(result);
+                            dataForFrontEnd.push(result);
+                            console.log("mapped Element",dataForFrontEnd);
+                            return res.send(dataForFrontEnd)
+                        })
+                }))
+                .then(console.log("promise all",dataForFrontEnd))
+            })
+        
+        .catch(err=>console.log(err))
+    })
+
+app.get('/', (req,res)=>{
+    console.log("welcome");
+    res.send("hello world");
+})
+
+
+
     //hard match with all tags provided by user. 
     // myDB.collection('resources').find({tags:{$all:tags}}).toArray(function(err,result){
     //     if (err) throw err;
@@ -43,43 +94,4 @@ app.get('/tech-answers/', (req,res,next)=>{
     //     return res.send(dataToSend);
     // });
     //Hard match end
-    //Match scoring found on SO
-    var sortedResults=myDB.collection('resources').aggregate([
-        {$unwind:'$tags'},
-        {$match:{tags:{$in:userTags}}},
-        {$group:{_id:'$_id',count:{$sum:1}}},
-        {$project:{_id:1,url:1,description:1,count:1,score:{$divide:['$count',userTags.length]}}},
-        {$sort:{score:-1}}
-    ]);
-    console.log("sortedResults",sortedResults);
-    let resultID=sortedResults
-        .toArray(function (err, result){
-            if (err) throw err;
-            let resultFiltered= result.map((object)=>{
-                return {'url':object.url,'description':object.description,'match':object.score, 'id':object._id};
-            })
-            let data={...resultFiltered}
-            console.log("data ID: ",data);
-            return data;
-        })
-        .then(data=>data.map(linkID=>{
-            if (linkID>0){
-                return linkID
-            }
-        }))
-        //add db.find here
- 
-})
 
-app.get('/', (req,res)=>{
-    console.log("welcome");
-    res.send("hello world");
-})
-
-// let sortedResults=db.collection('resources').aggregate([
-//     {$unwind:'$tags'},
-//     {$match:{tags:{$in:tags}}},
-//     {$group:{_id:'$_id',count:{$sum:1}}},
-//     {$project:{_id:1,count:1,score:{$divide:['$count',tags.length]}}},
-//     {$sort:$score=-1}
-// ]);
