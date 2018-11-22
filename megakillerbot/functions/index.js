@@ -21,6 +21,8 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     agent.add(`I'm sorry, can you try again?`);
   }
 
+
+  //START HERE
   function UserAsksTech(agent){
     let sessionsVar=agent.context.get('sessions-var');
     let currentContext=(agent.context.get('useraskedtech'));
@@ -71,7 +73,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
       return res;
       });
   }
-
+  //END HERE
 
    // Uncomment and edit to make your own intent handler
    // uncomment `intentMap.set('your intent name here', yourFunctionHandler);`
