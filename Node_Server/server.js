@@ -4,8 +4,8 @@ const app=express();
 const dotenv=require('dotenv').config();
 
 //please secure this
-let url = "mongodb://sonnyboy:lovelace2@ds063889.mlab.com:63889/dorothytest";
-const port = process.env.PORT || 3003;
+let url = "mongodb://localhost:27017/dorothycares";
+const port = process.env.PORT || 5000;
 
 var myDB;//global var for the DB, not so clean
 

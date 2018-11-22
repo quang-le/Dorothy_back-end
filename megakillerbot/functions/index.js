@@ -27,7 +27,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     let currentContext=(agent.context.get('useraskedtech'));
     console.log(currentContext, sessionsVar);
     agent.add("Wait, I'm looking in db for appropriate resource");
-    let answerRaw=sendGETReq('http://206.189.12.15:3003',prepareStringForGETReq(createTagsArray(currentContext.parameters)));
+    let answerRaw=sendGETReq('https://dorothycares.ovh/resources',prepareStringForGETReq(createTagsArray(currentContext.parameters)));
     console.log('answerRaw:',answerRaw);
     //let answer=JSON.parse(answerRaw);
     //console.log(answer);
