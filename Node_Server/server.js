@@ -45,12 +45,10 @@ app.get('/tech-answers/', (req,res,next)=>{
             let resultFiltered= result.map((object)=>{
                 return {'match':object.score, '_id':object._id};
             })
-            console.log("data ID: ",resultFiltered);
             return resolve(resultFiltered);
         })})
         .then(data=>{   
             let dataForFrontEnd=[];
-            console.log("data",data);
             let linkIDs=data.map((link)=>{
                 return link._id
             })
@@ -59,19 +57,14 @@ app.get('/tech-answers/', (req,res,next)=>{
                     .find({_id:{$in:linkIDs}})
                     .toArray(function(err,result){
                         if (err) throw err;
-                        console.log(result);
                         dataForFrontEnd.push(result);
-                        console.log("mapped Element",dataForFrontEnd);
                         dataToFrontEnd=JSON.stringify(dataForFrontEnd);
                         return res.send(dataForFrontEnd)
                     })
             })
-        
         .catch(err=>console.log(err))
     })
 
 app.get('/', (req,res)=>{
-    console.log("welcome");
     res.send("hello world");
 })
-
