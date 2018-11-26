@@ -3,6 +3,7 @@ const https = require('https');
 const functions = require('firebase-functions');
 const {WebhookClient} = require('dialogflow-fulfillment');
 const {Text, Card, Suggestion} = require('dialogflow-fulfillment');
+const axios=require('axios')
 
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, response) => {
   const agent = new WebhookClient({ request, response });
@@ -26,7 +27,12 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
   function UserAsksTech(agent){
     let sessionsVar=agent.context.get('sessions-var');
     let currentContext=(agent.context.get('useraskedtech'));
-    let answerRaw=sendGETReq('https://dorothycares.ovh/resources',prepareStringForGETReq(createTagsArray(currentContext.parameters)));
+    //agent.add ("Does this help you");
+    let request=formatGETReq('https://dorothycares.ovh/resources',prepareStringForGETReq(createTagsArray(currentContext.parameters)));
+  
+    agent.add(
+      sendReq(request)
+    )
   }
 
   function extractTags(contextParameter){
@@ -65,15 +71,22 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     return stringRequest;
   }
 
-  function sendGETReq(url,string){
+  function formatGETReq(url,string){
     let getReq=url.concat(string);
     console.log(getReq);
-    https.get(getReq, (res) =>{
-      console.log("api answer:",res);
-      return res;
-      });
+    return getReq
   }
-  //END HERE
+
+  async function sendReq(){
+    try{
+      const response = await axios.get('https://dorothycares.ovh/resources/tech-answers?0=javascript&1=array');
+      console.log('async body: ', response)
+      return JSON.parse(response); 
+    } catch(error){
+      console.error(error);
+    }
+  }
+  //END HERE  
 
    // Uncomment and edit to make your own intent handler
    // uncomment `intentMap.set('your intent name here', yourFunctionHandler);`
