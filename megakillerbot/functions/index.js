@@ -3,7 +3,8 @@ const https = require('https');
 const functions = require('firebase-functions');
 const {WebhookClient} = require('dialogflow-fulfillment');
 const {Text, Card, Suggestion} = require('dialogflow-fulfillment');
-const axios=require('axios')
+const axios=require('axios');
+const fetch=require('node-fetch');
 
 exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, response) => {
   const agent = new WebhookClient({ request, response });
@@ -24,18 +25,8 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
 
   //START HERE
-  function UserAsksTech(agent){
-    let sessionsVar=agent.context.get('sessions-var');
-    let currentContext=(agent.context.get('useraskedtech'));
-    //agent.add ("Does this help you");
-    let request=formatGETReq('https://dorothycares.ovh/resources',prepareStringForGETReq(createTagsArray(currentContext.parameters)));
-  
-    agent.add(
-      sendReq(request)
-    )
-  }
 
-  function extractTags(contextParameter){
+    function extractTags(contextParameter){
     let paramsArray=[];
     if (typeof contextParameter==='object'){
       paramsArray=contextParameter.map((param)=>{
@@ -77,15 +68,22 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     return getReq
   }
 
-  async function sendReq(){
-    try{
-      const response = await axios.get('https://dorothycares.ovh/resources/tech-answers?0=javascript&1=array');
-      console.log('async body: ', response)
-      return JSON.parse(response); 
-    } catch(error){
-      console.error(error);
-    }
+
+  async function UserAsksTech(agent){
+    let currentContext=(agent.context.get('useraskedtech'));
+    let request=formatGETReq('https://dorothycares.ovh/resources',prepareStringForGETReq(createTagsArray(currentContext.parameters)));
+    const response= await fetch(request, {
+      method:'get',
+      headers:{'Content-Type': 'application/json'},
+    });
+    const body=await response.json();
+    console.log("body:",body);
+    const bodyStringified=JSON.stringify(body);
+    console.log("stringified:",bodyStringified);
+    agent.add(bodyStringified);
   }
+
+
   //END HERE  
 
    // Uncomment and edit to make your own intent handler
