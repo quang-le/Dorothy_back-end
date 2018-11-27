@@ -26,7 +26,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
 
   //START HERE
 
-    function extractTags(contextParameter){
+  function extractTags(contextParameter){
     let paramsArray=[];
     if (typeof contextParameter==='object'){
       paramsArray=contextParameter.map((param)=>{
@@ -53,7 +53,7 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     return tagsArray;
   }
 
-  function prepareStringForGETReq(tagsArray){
+  function generateGetRequest(tagsArray){
     let stringRequest= "/tech-answers?";
     stringRequest=stringRequest.concat("0="+tagsArray[0]);
     for (let i=1;i<tagsArray.length;i++){
@@ -62,28 +62,25 @@ exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, resp
     return stringRequest;
   }
 
-  function formatGETReq(url,string){
+  function generateFullGetRequestUrl(url,string){
     let getReq=url.concat(string);
     console.log(getReq);
     return getReq
   }
 
-
   async function UserAsksTech(agent){
     let currentContext=(agent.context.get('useraskedtech'));
-    let request=formatGETReq('https://dorothycares.ovh/resources',prepareStringForGETReq(createTagsArray(currentContext.parameters)));
-    const response= await fetch(request, {
+    let queryTagsArray=createTagsArray(currentContext.parameters);
+    let getRequest=generateGetRequest(queryTagsArray)
+    let requestFullUrl=generateFullGetRequestUrl('https://dorothycares.ovh/resources',getRequest);
+    const response= await fetch(requestFullUrl, {
       method:'get',
       headers:{'Content-Type': 'application/json'},
     });
-    const body=await response.json();
-    console.log("body:",body);
-    const bodyStringified=JSON.stringify(body);
-    console.log("stringified:",bodyStringified);
-    agent.add(bodyStringified);
+    const body=await response.json();          //.json() needed to have usable info
+    const answer=JSON.stringify(body);// re-stringify so DialogFlow can read it
+    agent.add(answer);
   }
-
-
   //END HERE  
 
    // Uncomment and edit to make your own intent handler
