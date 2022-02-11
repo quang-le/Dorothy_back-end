@@ -10,7 +10,7 @@
     "dev": "concurrently --kill-others-on-fail \"npm run server\" \"npm run client\""
   },
   "dependencies": {
-    "ajv": "^6.5.4",
+    "ajv": "^6.12.3",
     "body-parser": "^1.18.3",
     "express": "^4.16.4",
     "express-session": "^1.15.6",
